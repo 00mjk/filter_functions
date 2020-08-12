@@ -690,6 +690,18 @@ class ExtensionTest(testutil.TestCase):
         self.assertIsNone(extended_pulse._control_matrix)
         self.assertIsNone(extended_pulse._filter_function)
 
+        # clean up some attrs
+        pulse_2.cleanup('conservative')
+        extended_pulse = ff.extend([(pulse_1, 0), (pulse_2, 1)], N=3)
+        self.assertIsNotNone(extended_pulse._total_propagator)
+        self.assertIsNone(extended_pulse._eigvals)
+        self.assertIsNone(extended_pulse._eigvecs)
+        self.assertIsNone(extended_pulse._propagators)
+        self.assertIsNone(extended_pulse._total_propagator_liouville)
+        self.assertIsNone(extended_pulse._total_phases)
+        self.assertIsNone(extended_pulse._control_matrix)
+        self.assertIsNone(extended_pulse._filter_function)
+
         # override
         extended_pulse = ff.extend([(pulse_1, 0), (pulse_2, 1)],
                                    cache_diagonalization=False)
@@ -723,6 +735,16 @@ class ExtensionTest(testutil.TestCase):
         # Get filter function for both
         pulse_2.cache_filter_function(omega)
         extended_pulse = ff.extend([(pulse_1, 0), (pulse_2, 1)])
+        self.assertIsNotNone(extended_pulse._total_propagator_liouville)
+        self.assertIsNotNone(extended_pulse._total_phases)
+        self.assertIsNotNone(extended_pulse._control_matrix)
+        self.assertIsNotNone(extended_pulse._filter_function)
+
+        # Get filter function for both, override
+        pulse_2.cache_filter_function(omega)
+        extended_pulse = ff.extend([(pulse_1, 0), (pulse_2, 1)],
+                                   cache_filter_function=True,
+                                   omega=None)
         self.assertIsNotNone(extended_pulse._total_propagator_liouville)
         self.assertIsNotNone(extended_pulse._total_phases)
         self.assertIsNotNone(extended_pulse._control_matrix)
