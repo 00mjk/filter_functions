@@ -159,19 +159,12 @@ class Basis(ndarray):
             if not hasattr(basis_array, '__getitem__'):
                 raise TypeError('Invalid data type. Must be array_like')
 
-            if isinstance(basis_array, cls):
+            if isinstance(basis_array, (cls, ndarray)):
                 basis = basis_array
             else:
-                try:
-                    # Allow single 2d element
-                    if len(basis_array.shape) == 2:
-                        basis_array = [basis_array]
-                except AttributeError:
-                    pass
-
                 basis = np.empty((len(basis_array), *basis_array[0].shape), dtype=complex)
                 for i, elem in enumerate(basis_array):
-                    if isinstance(elem, ndarray):   # numpy array
+                    if isinstance(elem, (cls, ndarray)):    # numpy array
                         basis[i] = elem
                     elif hasattr(elem, 'full'):     # qutip.Qobj
                         basis[i] = elem.full()
@@ -496,6 +489,9 @@ def _full_from_partial(elems: Sequence, traceless: Union[None, bool]) -> Basis:
     orthonormal basis.
     """
     elems = np.asanyarray(elems)
+    if elems.ndim == 2:
+        elems = elems[None, :, :]
+
     if not isinstance(elems, Basis):
         # Convert elems to basis to have access to its handy attributes
         elems = normalize(elems.view(Basis))
