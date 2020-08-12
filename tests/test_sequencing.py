@@ -1016,7 +1016,7 @@ class ExtensionTest(testutil.TestCase):
             )
 
         with self.assertRaises(ValueError):
-            # additional noise Hamiltonian defines existing identifier
+            # additional noise Hamiltonian has duplicate identifiers
             additional_noise_Hamiltonian = [
                 [util.tensor(X, X), np.ones(n_dt), 'foo'],
                 [util.tensor(X, X), np.ones(n_dt), 'foo'],
@@ -1025,6 +1025,13 @@ class ExtensionTest(testutil.TestCase):
                 [(pulse_1, 0), (pulse_1, 1)],
                 additional_noise_Hamiltonian=additional_noise_Hamiltonian
             )
+
+        with self.assertRaises(ValueError):
+            # additional_noise_Hamiltonian has existing identifiers
+            additional_noise_Hamiltonian = [[util.tensor(np.eye(2), pulse_1.n_opers[0]),
+                                             pulse_1.n_coeffs[0],
+                                             pulse_1.n_oper_identifiers[0] + '_1']]
+            ff.extend([(pulse_1, [1])], additional_noise_Hamiltonian=additional_noise_Hamiltonian)
 
         with self.assertRaises(ValueError):
             # additional_noise_Hamiltonian has wrong dimensions

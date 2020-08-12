@@ -2154,8 +2154,8 @@ def extend(pulse_to_qubit_mapping: PulseMapping,
         if add_n_opers.shape[1:] != (d, d):
             raise ValueError(f'Expected additional noise operators to have dimensions {(d, d)}, ' +
                              f'not {add_n_opers.shape[1:]}.')
-        if len(set(add_n_oper_id)) != len(add_n_oper_id):
-            raise ValueError('Found duplicate noise operator identifiers')
+        if set(add_n_oper_id).intersection(n_oper_identifiers):
+            raise ValueError('Duplicate noise operator identifier in additional noise Hamiltonian')
 
         n_opers.extend(add_n_opers)
         n_coeffs.extend(add_n_coeffs)
