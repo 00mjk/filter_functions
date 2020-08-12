@@ -2173,8 +2173,8 @@ def extend(pulse_to_qubit_mapping: PulseMapping,
             basis = Basis.ggm(d_per_qubit**N)
         elif btype == 'Pauli':
             basis = Basis.pauli(N)
-        elif btype == 'Custom':
-            warn('Original pulses had custom basis which I cannot extend.')
+        else:
+            warn('Original pulses had custom basis which I cannot extend. Using GGM for new pulse')
             basis = Basis.ggm(d_per_qubit**N)
 
     # Sort the identifiers

@@ -736,6 +736,14 @@ class ExtensionTest(testutil.TestCase):
         self.assertIsNone(extended_pulse._control_matrix)
         self.assertIsNone(extended_pulse._filter_function)
 
+        # Caching with non-Pauli basis
+        pulse_3 = copy(pulse_1)
+        pulse_3.basis = ff.Basis(pulse_1.basis[3], btype='all my base are belong to you')
+        with self.assertWarns(UserWarning):
+            extended_pulse = ff.extend([(pulse_3, 1)], omega=omega,
+                                       cache_diagonalization=True,
+                                       cache_filter_function=True)
+
     def test_accuracy(self):
         ID, X, Y, Z = util.paulis
         XI = util.tensor(X, ID)
@@ -1044,7 +1052,19 @@ class ExtensionTest(testutil.TestCase):
 
         with self.assertWarns(UserWarning):
             # Non-pauli basis
-            ff.extend([(pulse_2, 0)])
+            ff.extend([(pulse_2, 1)])
+
+        with self.assertWarns(UserWarning):
+            # Custom basis
+            pulse_3 = copy(pulse_1)
+            pulse_3.basis = ff.Basis(pulse_1.basis[1:3], btype='foobar')
+            ff.extend([(pulse_3, 1)])
+
+        with self.assertWarns(UserWarning):
+            # Different bases
+            pulse_3 = copy(pulse_1)
+            pulse_3.basis = pulse_2.basis
+            ff.extend([(pulse_1, 0), (pulse_3, 1)])
 
 
 class RemappingTest(testutil.TestCase):
