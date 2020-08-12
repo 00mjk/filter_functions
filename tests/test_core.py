@@ -24,6 +24,7 @@ This module tests the core functionality of the package.
 import string
 from copy import copy
 from random import sample
+import warnings
 
 import numpy as np
 
@@ -81,19 +82,19 @@ class CoreTest(testutil.TestCase):
 
         with self.assertRaises(TypeError):
             # Control Hamiltonian not list or tuple
-            ff.PulseSequence(np.array(H_c), H_n, dt)
+            ff.PulseSequence(np.array(H_c, dtype=object), H_n, dt)
 
         with self.assertRaises(TypeError):
             # Noise Hamiltonian not list or tuple
-            ff.PulseSequence(H_c, np.array(H_n), dt)
+            ff.PulseSequence(H_c, np.array(H_n, dtype=object), dt)
 
         with self.assertRaises(TypeError):
             # Element of control Hamiltonian not list or tuple
-            ff.PulseSequence([np.array(H_c[0])], H_n, dt)
+            ff.PulseSequence([np.array(H_c[0], dtype=object)], H_n, dt)
 
         with self.assertRaises(TypeError):
             # Element of noise Hamiltonian not list or tuple
-            ff.PulseSequence(H_c, [np.array(H_n[0])], dt)
+            ff.PulseSequence(H_c, [np.array(H_n[0], dtype=object)], dt)
 
         idx = rng.randint(0, 3)
         with self.assertRaises(TypeError):
@@ -138,14 +139,20 @@ class CoreTest(testutil.TestCase):
         H_n[idx][1] = coeff
         with self.assertRaises(TypeError):
             # Control operators weird dimensions
-            H_c[idx][0] = H_c[idx][0][:, :, None]
-            ff.PulseSequence(H_c, H_n, dt)
+            with warnings.catch_warnings():
+                # numpy>=1.19 raises a deprecation warning
+                warnings.simplefilter("ignore")
+                H_c[idx][0] = H_c[idx][0][:, :, None]
+                ff.PulseSequence(H_c, H_n, dt)
 
         H_c[idx][0] = H_c[idx][0].squeeze()
         with self.assertRaises(TypeError):
             # Noise operators weird dimensions
-            H_n[idx][0] = H_n[idx][0][:, :, None]
-            ff.PulseSequence(H_c, H_n, dt)
+            with warnings.catch_warnings():
+                # numpy>=1.19 raises a deprecation warning
+                warnings.simplefilter("ignore")
+                H_n[idx][0] = H_n[idx][0][:, :, None]
+                ff.PulseSequence(H_c, H_n, dt)
 
         H_n[idx][0] = H_n[idx][0].squeeze()
         with self.assertRaises(ValueError):
